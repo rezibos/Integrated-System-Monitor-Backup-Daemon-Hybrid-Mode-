@@ -228,9 +228,4 @@ Gunakan perintah berikut di terminal untuk debugging:
 
 MIT License - Free untuk tujuan edukasi.
 
------
-
 **© 2025 Kelompok Cukip - Universitas Maritim Raja Ali Haji**
-
-```
-```

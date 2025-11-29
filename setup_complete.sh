@@ -93,16 +93,17 @@ echo ""
 
 # Step 5: Create/update service file
 echo "⚙️  Step 5: Creating systemd service file..."
+# BAGIAN INI YANG DIPERBAIKI:
 cat > "$SERVICE_FILE" << EOFSERVICE
 [Unit]
-Description=Integrated System Monitor and Backup (Boot Once)
+Description=Integrated System Monitor and Backup (Hybrid Mode)
 Documentation=https://github.com/yourrepo/log-monitor
 After=network.target multi-user.target
 Wants=network.target
 
 [Service]
-Type=oneshot
-RemainAfterExit=no
+Type=simple
+Restart=always
 User=root
 Group=root
 WorkingDirectory=$BASE_DIR
@@ -139,7 +140,7 @@ echo ""
 
 # Step 8: Test run
 echo "🧪 Step 8: Test running service..."
-echo "   Starting service (this may take 10-30 seconds)..."
+echo "   Starting service (Seharusnya cepat karena Type=simple)..."
 echo ""
 
 systemctl start $SERVICE_NAME
@@ -160,46 +161,20 @@ if [ -f "$BASE_DIR/output/system_monitor_boot.log" ]; then
     LOG_LINES=$(wc -l < "$BASE_DIR/output/system_monitor_boot.log")
     echo "   ✓ Log file created: $LOG_LINES lines"
 else
-    echo "   ⚠️  Log file not found"
+    echo "   ⚠️  Log file not found (Mungkin log ada di journalctl)"
 fi
 
 BACKUP_COUNT_NEW=$(ls -1 "$BASE_DIR/output/backups/"*.zip 2>/dev/null | wc -l)
 echo "   ✓ Backup files: $BACKUP_COUNT_NEW"
 
 if [ -f "$BASE_DIR/web/data.json" ]; then
-    TOTAL_LOGS=$(grep -oP '"total":\s*\K\d+' "$BASE_DIR/web/data.json" | head -1)
-    echo "   ✓ data.json updated: $TOTAL_LOGS total logs"
+    # Cek update terakhir file data.json
+    echo "   ✓ data.json found"
 else
-    echo "   ⚠️  data.json not found"
+    echo "   ⚠️  data.json not found yet (Wait a moment)"
 fi
 
 echo ""
 echo "=============================================="
 echo "   ✅ Setup Selesai!"
-echo "=============================================="
-echo ""
-echo "📋 NEXT STEPS:"
-echo ""
-echo "1. Reboot untuk test auto-start:"
-echo "   sudo reboot"
-echo ""
-echo "2. Setelah boot, check status:"
-echo "   sudo systemctl status $SERVICE_NAME"
-echo ""
-echo "3. View logs:"
-echo "   sudo journalctl -u $SERVICE_NAME -n 50"
-echo "   cat $BASE_DIR/output/system_monitor_boot.log"
-echo ""
-echo "4. Start web dashboard:"
-echo "   cd $BASE_DIR/web"
-echo "   python3 -m http.server 8080"
-echo "   Browser: http://localhost:8080"
-echo ""
-echo "=============================================="
-echo ""
-echo "🔍 MONITORING COMMANDS:"
-echo "   Status: sudo systemctl status $SERVICE_NAME"
-echo "   Logs:   sudo journalctl -u $SERVICE_NAME -f"
-echo "   Files:  ls -lh $BASE_DIR/output/backups/"
-echo ""
 echo "=============================================="
